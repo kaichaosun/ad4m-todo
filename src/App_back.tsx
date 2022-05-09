@@ -1,12 +1,11 @@
 import Login from './components/Login';
 import './App.css';
 import { useContext, useEffect, useRef, useState } from 'react';
-import { Loader, Stack, Text, TextInput } from '@mantine/core';
+import { Loader, Stack } from '@mantine/core';
 import { Ad4mContext } from '.';
 import TodoItem from './components/TodoItem';
-import Footer from './components/Footer';
+import Footer from './components/Footer'
 import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS, ENTER_KEY } from './config';
-import Header from './components/Header';
 
 const App = (props: IAppProps) => {
   const ad4mClient = useContext(Ad4mContext);
@@ -163,28 +162,29 @@ const App = (props: IAppProps) => {
 
   return (
     <div className="App">
-      <Stack align="center" spacing="xl" style={{ margin: "auto" }}>
-        <Header />
-        {!connected && (
+      {!connected && (
+        <Stack align="center" spacing="xl" style={{ margin: "auto" }}>
           <Loader />
-        )}
-        {connected && !isLogined && (
+        </Stack>
+      )}
+      {connected && !isLogined && (
+        <Stack align="center" spacing="xl" style={{ margin: "auto" }}>
           <Login handleLogin={handleLogin} />
-        )}
-        {isLogined && <Text>DID: {did}</Text>}
-
-        <TextInput
-          type="text"
+        </Stack>
+      )}
+      {isLogined && <p>DID: {did}</p>}
+      <header className="header">
+        <h1>todos</h1>
+        <input
           ref={inputRef}
+          className="new-todo"
           placeholder="What needs to be done?"
-          label="Add a task"
           onKeyDown={handleNewTodoKeyDown}
           autoFocus={true}
         />
-
-        {main}
-        {footer}
-      </Stack>
+      </header>
+      {main}
+      {footer}
     </div>
   );
 }

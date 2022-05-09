@@ -1,6 +1,6 @@
-import classNames from 'classnames'
 import { ESCAPE_KEY, ENTER_KEY } from '../config'
 import { useRef, useState } from 'react';
+import { Checkbox, Text, CloseButton, Group, List, ListItem } from '@mantine/core';
 
 const TodoItem = (props: ITodoItemProps) => {
   const [editText, setEditText] = useState("");
@@ -34,33 +34,30 @@ const TodoItem = (props: ITodoItemProps) => {
       handleSubmit(event);
     }
   }
-  
+
   return (
-    <li className={classNames({
-      completed: props.todo.completed,
-      editing: props.editing
-    })}>
-      <div className="view">
+    <List>
+        <Group>
+          <Checkbox
+            checked={props.todo.completed}
+            onChange={props.onToggle}
+          />
+          <Text onDoubleClick={handleEdit}>
+            {props.todo.title}
+          </Text>
+          <CloseButton onClick={props.onDestroy} />
+        </Group>
+      <ListItem>
         <input
-          className="toggle"
-          type="checkbox"
-          checked={props.todo.completed}
-          onChange={props.onToggle}
+          ref={editField}
+          className="edit"
+          value={editText}
+          onBlur={e => handleSubmit(e)}
+          onChange={e => handleChange(e)}
+          onKeyDown={e => handleKeyDown(e)}
         />
-        <label onDoubleClick={ e => handleEdit() }>
-          {props.todo.title}
-        </label>
-        <button className="destroy" onClick={props.onDestroy} />
-      </div>
-      <input
-        ref={editField}
-        className="edit"
-        value={editText}
-        onBlur={ e => handleSubmit(e) }
-        onChange={ e => handleChange(e) }
-        onKeyDown={ e => handleKeyDown(e) }
-      />
-    </li>
+      </ListItem>
+    </List>
   );
 }
 
