@@ -8,16 +8,18 @@ import { NotificationsProvider } from '@mantine/notifications';
 import { createContext } from 'react';
 import { buildAd4mClient } from './util';
 import { AD4M_ENDPOINT } from './config';
+import { TodoModel } from './TodoModel';
 
 const ad4mClient = buildAd4mClient(AD4M_ENDPOINT);
 export const Ad4mContext = createContext(ad4mClient);
+const model = new TodoModel('react-todos');
 
 ReactDOM.render(
   <React.StrictMode>
     <MantineProvider>
       <NotificationsProvider>
         <Ad4mContext.Provider value={ad4mClient}>
-          <App />
+          <App model={model} />
         </Ad4mContext.Provider>
       </NotificationsProvider>
     </MantineProvider>

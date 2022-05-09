@@ -1,9 +1,11 @@
 import classNames from 'classnames'
 import { ESCAPE_KEY, ENTER_KEY } from '../config'
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 
 const TodoItem = (props: ITodoItemProps) => {
   const [editText, setEditText] = useState("");
+
+  const editField = useRef<HTMLInputElement>(null);
 
   const handleEdit = () => {
     props.onEdit();
@@ -51,7 +53,7 @@ const TodoItem = (props: ITodoItemProps) => {
         <button className="destroy" onClick={props.onDestroy} />
       </div>
       <input
-        ref="editField"
+        ref={editField}
         className="edit"
         value={editText}
         onBlur={ e => handleSubmit(e) }

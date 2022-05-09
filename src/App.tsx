@@ -1,11 +1,11 @@
 import Login from './components/Login';
 import './App.css';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Loader, Stack } from '@mantine/core';
 import { Ad4mContext } from '.';
 import TodoItem from './components/TodoItem';
 import Footer from './components/Footer'
-import {ACTIVE_TODOS, COMPLETED_TODOS, ENTER_KEY} from './config';
+import { ACTIVE_TODOS, COMPLETED_TODOS, ENTER_KEY } from './config';
 
 const App = (props: IAppProps) => {
   const ad4mClient = useContext(Ad4mContext);
@@ -15,6 +15,10 @@ const App = (props: IAppProps) => {
   const [did, setDid] = useState("");
   const [nowShowing, setNowShowing] = useState("");
   const [editing, setEditing] = useState("");
+  const [refresh, setRefresh] = useState(false);
+  const [markAllComplete, setMarkAllComplete] = useState(false);
+
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const checkConnection = async () => {
@@ -39,14 +43,17 @@ const App = (props: IAppProps) => {
 
   const handleToggle = (todoToToggle: ITodo) => {
     props.model.toggle(todoToToggle);
+    setRefresh(!refresh);
   }
 
   const handleDestroy = (todo: ITodo) => {
     props.model.destroy(todo);
+    setRefresh(!refresh);
   }
 
   const handleEdit = (todo: ITodo) => {
     setEditing(todo.id);
+    setRefresh(!refresh);
   }
 
   const handleSave = (todo: ITodo, text) => {
@@ -65,6 +72,7 @@ const App = (props: IAppProps) => {
   const toggleAll = (event) => {
     let checked = event.target.checked;
     props.model.toggleAll(checked);
+    setMarkAllComplete(checked)
   }
 
   const handleNewTodoKeyDown = (event) => {
@@ -72,8 +80,12 @@ const App = (props: IAppProps) => {
       return;
     }
 
-    event.preventDefault();
+    let val = inputRef.current?.value.trim();
 
+    if (val) {
+      props.model.addTodo(val);
+      setRefresh(!refresh);
+    }
   }
 
   let footer;
@@ -133,7 +145,7 @@ const App = (props: IAppProps) => {
           id="toggle-all"
           className="toggle-all"
           type="checkbox"
-          onChange={e => toggleAll(e)}
+          onChange={toggleAll}
           checked={activeTodoCount === 0}
         />
         <label
@@ -164,10 +176,10 @@ const App = (props: IAppProps) => {
       <header className="header">
         <h1>todos</h1>
         <input
-          ref="newField"
+          ref={inputRef}
           className="new-todo"
           placeholder="What needs to be done?"
-          onKeyDown={e => handleNewTodoKeyDown(e)}
+          onKeyDown={handleNewTodoKeyDown}
           autoFocus={true}
         />
       </header>
