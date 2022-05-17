@@ -29,7 +29,7 @@ const App = (props: IAppProps) => {
   useEffect(() => {
     const checkConnection = async () => {
       try {
-        await ad4mClient.runtime.hcAgentInfos(); // TODO runtime info is broken
+        // await ad4mClient.runtime.hcAgentInfos(); // TODO runtime info is broken
         console.log("get hc agent infos success.");
         setConnected(true);
       } catch (err) {
@@ -174,7 +174,7 @@ const App = (props: IAppProps) => {
   const requestAuth = async (event: React.SyntheticEvent) => {
     event.preventDefault();
     try {
-      let requestId = await ad4mClient.agent.requestAuth("demo-app", "demo-desc", "demo-url", ["AgentQueryCapability", "AgentMutationCapability"]);
+      let requestId = await ad4mClient.agent.requestAuth("demo-app", "demo-desc", "demo-url", '[{"with":{"domain":"agent","pointers":["*"]},"can":["QUERY"]}]');
       console.log("auth request id: ", requestId);
       setRequestId(requestId);
     } catch (err) {
