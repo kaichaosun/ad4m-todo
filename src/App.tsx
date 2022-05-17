@@ -1,12 +1,13 @@
 import Login from './components/Login';
 import './App.css';
 import { useContext, useEffect, useRef, useState } from 'react';
-import { Loader, Stack, Text, TextInput } from '@mantine/core';
+import { Button, Loader, Stack, Text, TextInput } from '@mantine/core';
 import { Ad4mContext } from '.';
 import TodoItem from './components/TodoItem';
 import Footer from './components/Footer';
-import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS, ENTER_KEY } from './config';
+import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS, ENTER_KEY, AD4M_ENDPOINT } from './config';
 import Header from './components/Header';
+import { buildAd4mClientJwt } from './util';
 
 const App = (props: IAppProps) => {
   const ad4mClient = useContext(Ad4mContext);
@@ -18,6 +19,10 @@ const App = (props: IAppProps) => {
   const [editing, setEditing] = useState("");
   const [refresh, setRefresh] = useState(false);
   const [markAllComplete, setMarkAllComplete] = useState(false);
+  const [requestId, setRequestId] = useState("");
+  const [phrase, setPhrase] = useState("");
+  const [jwt, setJwt] = useState("");
+  const [ad4mClientJwt, setAd4mClientJwt] = useState(ad4mClient);
 
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -36,6 +41,11 @@ const App = (props: IAppProps) => {
 
     console.log("Check if ad4m service is connected.")
   }, [ad4mClient]);
+
+  useEffect(() => {
+    const ad4mClientNew = buildAd4mClientJwt(AD4M_ENDPOINT, jwt);
+    setAd4mClientJwt(ad4mClientNew)
+  }, [jwt]);
 
   const handleLogin = (login: Boolean, did: string) => {
     setIsLogined(login);
@@ -161,6 +171,44 @@ const App = (props: IAppProps) => {
     );
   }
 
+  const requestAuth = async (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    try {
+      let requestId = await ad4mClient.agent.requestAuth("demo-app", "demo-desc", "demo-url", ["AgentQueryCapability", "AgentMutationCapability"]);
+      console.log("auth request id: ", requestId);
+      setRequestId(requestId);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const generateJwt = async (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    try {
+      let jwt = await ad4mClient.agent.generateJwt(requestId, phrase);
+      console.log("auth jwt: ", jwt);
+      setJwt(jwt);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const checkJwt = async (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    try {
+      let status = await ad4mClientJwt.agent.status();
+      console.log("agent status: ", status);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const onPhraseChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    let { value } = event.target;
+    setPhrase(value);
+  }
+
   return (
     <div className="App">
       <Stack align="center" spacing="xl" style={{ margin: "auto" }}>
@@ -172,6 +220,24 @@ const App = (props: IAppProps) => {
           <Login handleLogin={handleLogin} />
         )}
         {isLogined && <Text>DID: {did}</Text>}
+        <Button onClick={requestAuth} >
+          Request auth
+        </Button>
+
+        <TextInput
+          type="text"
+          placeholder="number"
+          label="Input 6-digits number"
+          onChange={onPhraseChange}
+        />
+
+        <Button onClick={generateJwt} >
+          Generate JWT token
+        </Button>
+
+        <Button onClick={checkJwt} >
+          Get capabilities of JWT token
+        </Button>
 
         <TextInput
           type="text"

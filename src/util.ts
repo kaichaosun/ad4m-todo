@@ -6,7 +6,48 @@ export function buildAd4mClient(server: string): Ad4mClient {
 	let apolloClient = new ApolloClient({
 		link: new WebSocketLink({
 			uri: server,
-			options: { reconnect: true },
+			options: {
+				reconnect: true,
+				connectionParams: async () => {
+					return {
+						headers: {
+							// authorization: "eyJhbGciOiJFUzI1NksifQ.eyJhcHBOYW1lIjoiZGVtby1hcHAiLCJhcHBEZXNjIjoiZGVtby1kZXNjIiwiYXBwVXJsIjoiZGVtby11cmwiLCJjYXBhYmlsaXRpZXMiOlsiQWdlbnRRdWVyeUNhcGFiaWxpdHkiLCJBZ2VudE11dGF0aW9uQ2FwYWJpbGl0eSJdLCJpYXQiOjE2NTI3NTM5NTEsImlzcyI6ImRpZDprZXk6elEzc2huSzFzQm51b3daZEJmWUgzYkRwVkxtRVFHZlpRYkhuTlFqM3RnQmRycWQ4TiIsImF1ZCI6ImRlbW8tYXBwOmRpZDprZXk6elEzc2huSzFzQm51b3daZEJmWUgzYkRwVkxtRVFHZlpRYkhuTlFqM3RnQmRycWQ4TiIsImV4cCI6MTY1MzM1ODc1MX0.wG9RKvDZ2A76PKJP1EPGKAIHqMB3XwjzK8jNBkEELPQv4lpr8EHUL0n-9wJryxCF9if7NJgIMvWlTB-nWtlADA"
+							// authorization: "eyJhbGciOiJFUzI1NksifQ.eyJhcHBOYW1lIjoiZGVtby1hcHAiLCJhcHBEZXNjIjoiZGVtby1kZXNjIiwiYXBwVXJsIjoiZGVtby11cmwiLCJjYXBhYmlsaXRpZXMiOlsiQWdlbnRRdWVyeUNhcGFiaWxpdHkiLCJBZ2VudE11dGF0aW9uQ2FwYWJpbGl0eSJdLCJpYXQiOjE2NTI3NTk5MzMsImlzcyI6ImRpZDprZXk6elEzc2huSzFzQm51b3daZEJmWUgzYkRwVkxtRVFHZlpRYkhuTlFqM3RnQmRycWQ4TiIsImF1ZCI6ImRlbW8tYXBwOmRpZDprZXk6elEzc2huSzFzQm51b3daZEJmWUgzYkRwVkxtRVFHZlpRYkhuTlFqM3RnQmRycWQ4TiIsImV4cCI6MTY1Mjc1OTk1M30.LJ95AP7rwjtD-KAgmEUuMfiaujJud2XKy129Dm1y6ampHSV_xYyuPrxyV96YAVhkgmxRHupFzeE59LXCzdRwxA"
+						}
+					}
+				}
+			},
+			webSocketImpl: WebSocket,
+		}),
+		cache: new InMemoryCache({ resultCaching: false, addTypename: false }),
+		defaultOptions: {
+			watchQuery: {
+				fetchPolicy: "no-cache",
+			},
+			query: {
+				fetchPolicy: "no-cache",
+			}
+		},
+	});
+
+	//@ts-ignore
+	return new Ad4mClient(apolloClient);
+}
+
+export function buildAd4mClientJwt(server: string, jwt: string): Ad4mClient {
+	let apolloClient = new ApolloClient({
+		link: new WebSocketLink({
+			uri: server,
+			options: {
+				reconnect: true,
+				connectionParams: async () => {
+					return {
+						headers: {
+							authorization: jwt
+						}
+					}
+				}
+			},
 			webSocketImpl: WebSocket,
 		}),
 		cache: new InMemoryCache({ resultCaching: false, addTypename: false }),
