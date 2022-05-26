@@ -8,6 +8,8 @@ import Footer from './components/Footer';
 import { ALL_TODOS, ACTIVE_TODOS, COMPLETED_TODOS, ENTER_KEY, AD4M_ENDPOINT } from './config';
 import Header from './components/Header';
 import { buildAd4mClientJwt } from './util';
+import { ExceptionInfo } from '@perspect3vism/ad4m/lib/src/runtime/RuntimeResolver';
+import { ExceptionType } from '@perspect3vism/ad4m';
 
 const App = (props: IAppProps) => {
   const ad4mClient = useContext(Ad4mContext);
@@ -26,21 +28,21 @@ const App = (props: IAppProps) => {
 
   const inputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    const checkConnection = async () => {
-      try {
-        // await ad4mClient.runtime.hcAgentInfos(); // TODO runtime info is broken
-        console.log("get hc agent infos success.");
-        setConnected(true);
-      } catch (err) {
-        setConnected(false);
-      }
-    }
+  // useEffect(() => {
+  //   const checkConnection = async () => {
+  //     try {
+  //       let result = await ad4mClient.runtime.hcAgentInfos(); // TODO runtime info is broken
+  //       console.log("get hc agent infos success.", result);
+  //       setConnected(true);
+  //     } catch (err) {
+  //       setConnected(false);
+  //     }
+  //   }
 
-    checkConnection();
+  //   checkConnection();
 
-    console.log("Check if ad4m service is connected.")
-  }, [ad4mClient]);
+  //   console.log("Check if ad4m service is connected.")
+  // }, [ad4mClient]);
 
   useEffect(() => {
     const ad4mClientNew = buildAd4mClientJwt(AD4M_ENDPOINT, jwt);
@@ -171,12 +173,34 @@ const App = (props: IAppProps) => {
     );
   }
 
-  const requestAuth = async (event: React.SyntheticEvent) => {
+  const requestCapability = async (event: React.SyntheticEvent) => {
     event.preventDefault();
     try {
-      let requestId = await ad4mClient.agent.requestAuth("demo-app", "demo-desc", "demo-url", '[{"with":{"domain":"agent","pointers":["*"]},"can":["QUERY"]}]');
+      let requestId = await ad4mClient.agent.requestCapability("demo-app", "demo-desc", "demo-url", '[{"with":{"domain":"agent","pointers":["*"]},"can":["READ"]},{"with":{"domain":"runtime.exception","pointers":["*"]},"can":["SUBSCRIBE"]}]');
       console.log("auth request id: ", requestId);
+      ad4mClient.runtime.addExceptionCallback((exception: ExceptionInfo) => {
+        console.log("hello in subscription from todo app")
+        if (exception.type === ExceptionType.CapabilityRequested) {
+          console.log("new capability request", JSON.stringify(exception))
+        }
+        return null
+      })
       setRequestId(requestId);
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  const subscribeException = async (event: React.SyntheticEvent) => {
+    console.log("subscribe here")
+    try {
+      ad4mClientJwt.runtime.addExceptionCallback((exception: ExceptionInfo) => {
+        console.log("subscribe comes in")
+        if (exception.type === ExceptionType.CapabilityRequested) {
+          console.log("new capability request", JSON.stringify(exception))
+        }
+        return null
+      })
     } catch (err) {
       console.log(err);
     }
@@ -213,14 +237,18 @@ const App = (props: IAppProps) => {
     <div className="App">
       <Stack align="center" spacing="xl" style={{ margin: "auto" }}>
         <Header />
-        {!connected && (
+        {/* {!connected && (
           <Loader />
         )}
         {connected && !isLogined && (
           <Login handleLogin={handleLogin} />
-        )}
+        )} */}
         {isLogined && <Text>DID: {did}</Text>}
-        <Button onClick={requestAuth} >
+        <Button onClick={subscribeException} >
+          Subscribe exception
+        </Button>
+
+        <Button onClick={requestCapability} >
           Request auth
         </Button>
 
@@ -239,7 +267,7 @@ const App = (props: IAppProps) => {
           Get capabilities of JWT token
         </Button>
 
-        <TextInput
+        {/* <TextInput
           type="text"
           ref={inputRef}
           placeholder="What needs to be done?"
@@ -249,7 +277,7 @@ const App = (props: IAppProps) => {
         />
 
         {main}
-        {footer}
+        {footer} */}
       </Stack>
     </div>
   );
