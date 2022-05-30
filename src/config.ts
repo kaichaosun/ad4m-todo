@@ -1,4 +1,4 @@
-export const AD4M_ENDPOINT = "ws://localhost:4000/graphql";
+export const AD4M_ENDPOINT = "ws://localhost:12000/graphql";
 
 export const ALL_TODOS = 'all';
 export const ACTIVE_TODOS = 'active';
