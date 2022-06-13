@@ -10,6 +10,7 @@ import Header from './components/Header';
 import { buildAd4mClientJwt } from './util';
 import { ExceptionInfo } from '@perspect3vism/ad4m/lib/src/runtime/RuntimeResolver';
 import { ExceptionType } from '@perspect3vism/ad4m';
+import { Capabilities, Capability } from 'app-capability';
 
 const App = (props: IAppProps) => {
   const ad4mClient = useContext(Ad4mContext);
@@ -176,7 +177,11 @@ const App = (props: IAppProps) => {
   const requestCapability = async (event: React.SyntheticEvent) => {
     event.preventDefault();
     try {
-      let requestId = await ad4mClient.agent.requestCapability("demo-app", "demo-desc", "demo-url", '[{"with":{"domain":"agent","pointers":["*"]},"can":["READ"]},{"with":{"domain":"runtime.exception","pointers":["*"]},"can":["SUBSCRIBE"]}]');
+      let capabilities: Capabilities = [
+        {with: {domain: "agent", pointers: ["*"]}, can: ["READ"]},
+        {with: {domain: "runtime.exception", pointers: ["*"]}, can: ["SUBSCRIBE"]}
+      ]
+      let requestId = await ad4mClient.agent.requestCapability("demo-app", "demo-desc", "demo-url", JSON.stringify(capabilities));
       console.log("auth request id: ", requestId);
       ad4mClient.runtime.addExceptionCallback((exception: ExceptionInfo) => {
         console.log("hello in subscription from todo app")
