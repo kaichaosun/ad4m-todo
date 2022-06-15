@@ -269,7 +269,7 @@ const App = (props: IAppProps) => {
         </Button>
 
         <Button onClick={checkJwt} >
-          Get capabilities of JWT token
+          Check capabilities of JWT token with agent status request, in console log
         </Button>
 
         {/* <TextInput
